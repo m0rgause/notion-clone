@@ -1,0 +1,327 @@
+{
+  "info": {
+    "_postman_id": "random-uuid",
+    "name": "Mini Notion Clone",
+    "description": "API collection for Mini Notion Clone",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Create Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"My First Note\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Notes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Note by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Note Title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blocks",
+      "item": [
+        {
+          "name": "Create Block",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"TEXT\",\n    \"content\": \"This is a text block\",\n    \"parentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Block",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"Updated block content\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/{{blockId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks",
+                "{{blockId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Block",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/{{blockId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks",
+                "{{blockId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reorder Blocks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"blocks\": [\n        {\n            \"id\": \"block-id-1\",\n            \"orderIndex\": 0\n        },\n        {\n            \"id\": \"block-id-2\",\n            \"orderIndex\": 1\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/reorder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks",
+                "reorder"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
