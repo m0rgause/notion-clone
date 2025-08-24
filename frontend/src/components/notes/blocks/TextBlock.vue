@@ -3,8 +3,10 @@
     <div v-if="editor" class="editor-wrapper">
       <!-- Toolbar -->
       <div
-        v-if="editor.isFocused"
+        v-if="isFocused || isEditorFocused || isToolbarHovered"
         class="toolbar bg-white border border-gray-200 rounded-lg shadow-lg p-2 mb-2 flex items-center space-x-1"
+        @mouseenter="isToolbarHovered = true"
+        @mouseleave="isToolbarHovered = false"
       >
         <!-- Bold -->
         <button
@@ -180,6 +182,7 @@ import Typography from "@tiptap/extension-typography";
 interface Props {
   content: string;
   placeholder?: string;
+  isFocused?: boolean;
 }
 
 interface Emits {
@@ -188,11 +191,15 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   placeholder: "Type something...",
+  isFocused: false,
 });
 
 const emit = defineEmits<Emits>();
 
 const editor = ref<Editor>();
+const isEditorFocused = ref(false);
+const isToolbarHovered = ref(false);
+const blurTimeout = ref<number | null>(null);
 
 onMounted(() => {
   editor.value = new Editor({
@@ -211,6 +218,19 @@ onMounted(() => {
     onUpdate: ({ editor }) => {
       emit("update", editor.getHTML());
     },
+    onFocus: () => {
+      if (blurTimeout.value) {
+        clearTimeout(blurTimeout.value);
+        blurTimeout.value = null;
+      }
+      isEditorFocused.value = true;
+    },
+    onBlur: () => {
+      // Delay the blur to allow clicking on toolbar
+      blurTimeout.value = setTimeout(() => {
+        isEditorFocused.value = false;
+      }, 150) as unknown as number;
+    },
     editorProps: {
       attributes: {
         class:
@@ -221,6 +241,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  if (blurTimeout.value) {
+    clearTimeout(blurTimeout.value);
+  }
   editor.value?.destroy();
 });
 

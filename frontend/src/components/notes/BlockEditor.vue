@@ -169,6 +169,7 @@
             <TextBlock
               v-if="block.type === 'TEXT'"
               :content="block.content || ''"
+              :is-focused="focusedBlockId === block.id"
               @update="updateBlock(block.id, $event)"
             />
             <ChecklistBlock
