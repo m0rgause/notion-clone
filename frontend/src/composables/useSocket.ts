@@ -1,6 +1,5 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { io, Socket } from "socket.io-client";
-import { useAuthStore } from "../stores/auth";
 
 interface User {
   id: string;
@@ -13,10 +12,8 @@ export function useSocket() {
   const activeUsers = ref<User[]>([]);
 
   onMounted(() => {
-    const authStore = useAuthStore();
-
     socket.value = io("http://localhost:3000", {
-      auth: { token: authStore.token },
+      withCredentials: true, // This will send cookies with the connection
     });
 
     socket.value.on("connect", () => {

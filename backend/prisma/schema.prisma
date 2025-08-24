@@ -9,26 +9,44 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  notes     Note[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String             @id @default(uuid())
+  email          String             @unique
+  password       String
+  notes          Note[]
+  collaborations NoteCollaborator[]
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  title     String
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
-  blocks    Block[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String             @id @default(uuid())
+  title         String
+  isPublic      Boolean            @default(false) @map("is_public")
+  publicId      String?            @unique @map("public_id") // For public link access
+  userId        String             @map("user_id")
+  user          User               @relation(fields: [userId], references: [id])
+  blocks        Block[]
+  collaborators NoteCollaborator[]
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
 
   @@map("notes")
+}
+
+model NoteCollaborator {
+  id         String     @id @default(uuid())
+  noteId     String     @map("note_id")
+  note       Note       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  userId     String     @map("user_id")
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @default(VIEW)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@unique([noteId, userId])
+  @@map("note_collaborators")
 }
 
 model Block {
@@ -39,7 +57,7 @@ model Block {
   parent     Block?    @relation("BlockToBlock", fields: [parentId], references: [id])
   children   Block[]   @relation("BlockToBlock")
   type       BlockType
-  content    String
+  content    String?
   orderIndex Int       @map("order_index")
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
@@ -52,4 +70,10 @@ enum BlockType {
   CHECKLIST
   IMAGE
   CODE
+}
+
+enum Permission {
+  VIEW
+  COMMENT
+  EDIT
 }

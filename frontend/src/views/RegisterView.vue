@@ -1,183 +1,155 @@
 <template>
-  <div class="min-h-screen relative flex items-center justify-center">
-    <!-- Background gradient -->
-    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20" />
-    
-    <!-- Animated circles -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -left-4 -top-4 h-64 w-64 rounded-full bg-primary/10 blur-3xl animate-pulse" />
-      <div class="absolute -right-4 -bottom-4 h-64 w-64 rounded-full bg-secondary/10 blur-3xl animate-pulse delay-700" />
+  <div class="min-h-screen bg-white flex flex-col">
+    <!-- Header -->
+    <div class="px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 bg-gray-900 rounded"></div>
+          <span class="text-lg font-semibold text-gray-900">Mini Notion</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Main content -->
-    <div class="container relative z-10 mx-auto flex flex-col items-center justify-center px-4">
-      <div class="w-full max-w-[400px] space-y-8">
-        <!-- Logo or title -->
-        <div class="text-center space-y-2">
-          <h1 class="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Mini Notion
+    <!-- Main Content -->
+    <div class="flex-1 flex items-center justify-center px-6 py-12">
+      <div class="w-full max-w-sm">
+        <div class="text-center mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">
+            Create an account
           </h1>
-          <p class="text-muted-foreground">Your ideas, organized beautifully</p>
+          <p class="text-gray-600">Start your journey with Notion</p>
         </div>
 
-        <Card class="border-2 border-border/50 bg-card/50 backdrop-blur-xl shadow-xl">
-          <CardHeader>
-            <CardTitle class="text-xl font-semibold bg-gradient-to-r from-primary/80 to-secondary/80 bg-clip-text text-transparent">
-              Create an account
-            </CardTitle>
-            <CardDescription>
-              Enter your details to start your journey
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form @submit="handleRegister" class="space-y-6">
-              <div class="space-y-4">
-                <FormField name="email" v-slot="{ field, errorMessage }">
-                  <FormItem>
-                    <FormLabel class="text-foreground/70">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="email"
-                        v-bind="field"
-                        type="email"
-                        placeholder="name@example.com"
-                        autocomplete="email"
-                        class="bg-card/50 border-border/50 backdrop-blur-sm focus:ring-primary/50"
-                      />
-                    </FormControl>
-                    <FormDescription v-if="errorMessage" class="text-destructive">
-                      {{ errorMessage }}
-                    </FormDescription>
-                  </FormItem>
-                </FormField>
+        <Form @submit="handleRegister" class="space-y-6">
+          <div class="space-y-4">
+            <FormField name="email" v-slot="{ field, errorMessage }">
+              <FormItem>
+                <FormLabel class="text-sm font-medium text-gray-700"
+                  >Email</FormLabel
+                >
+                <FormControl>
+                  <Input
+                    id="email"
+                    v-bind="field"
+                    type="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                  />
+                </FormControl>
+                <FormDescription
+                  v-if="errorMessage"
+                  class="text-red-600 text-sm"
+                >
+                  {{ errorMessage }}
+                </FormDescription>
+              </FormItem>
+            </FormField>
 
-                <FormField name="password" v-slot="{ field, errorMessage }">
-                  <FormItem>
-                    <FormLabel class="text-foreground/70">Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="password"
-                        v-bind="field"
-                        type="password"
-                        placeholder="Create a secure password"
-                        autocomplete="new-password"
-                        class="bg-card/50 border-border/50 backdrop-blur-sm focus:ring-primary/50"
-                      />
-                    </FormControl>
-                    <FormDescription :class="{'text-destructive': errorMessage}">
-                      {{ errorMessage || 'At least 8 characters long' }}
-                    </FormDescription>
-                  </FormItem>
-                </FormField>
-              </div>
-              
-              <Button 
-                type="submit" 
-                class="w-full font-semibold relative overflow-hidden group transition-all"
-                size="lg"
-                :disabled="loading"
-              >
-                <span class="relative z-10">
-                  {{ loading ? 'Creating account...' : 'Create account' }}
-                </span>
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </Button>
-            </Form>
-          </CardContent>
-          <CardFooter class="flex flex-col space-y-4 pb-6">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center">
-                <span class="w-full border-t border-border/50" />
-              </div>
-              <div class="relative flex justify-center text-xs uppercase">
-                <span class="bg-card/80 px-2 text-muted-foreground backdrop-blur-sm">
-                  Already registered?
-                </span>
-              </div>
-            </div>
-            <router-link
-              to="/login"
-              class="text-sm text-center text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline inline-flex items-center justify-center group"
+            <FormField name="password" v-slot="{ field, errorMessage }">
+              <FormItem>
+                <FormLabel class="text-sm font-medium text-gray-700"
+                  >Password</FormLabel
+                >
+                <FormControl>
+                  <Input
+                    id="password"
+                    v-bind="field"
+                    type="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                  />
+                </FormControl>
+                <FormDescription
+                  :class="{
+                    'text-red-600': errorMessage,
+                    'text-gray-500': !errorMessage,
+                  }"
+                  class="text-sm"
+                >
+                  {{ errorMessage || "At least 8 characters" }}
+                </FormDescription>
+              </FormItem>
+            </FormField>
+          </div>
+
+          <Button
+            type="submit"
+            class="w-full py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            :disabled="loading"
+          >
+            {{ loading ? "Creating account..." : "Create account" }}
+          </Button>
+        </Form>
+
+        <!-- Sign in link -->
+        <div class="mt-4 text-center">
+          <p class="text-sm text-gray-500">
+            Already have an account?
+            <router-link to="/login" class="text-gray-900 hover:underline ml-1"
+              >Sign in</router-link
             >
-              Sign in to your account
-              <span class="inline-block transition-transform group-hover:translate-x-1 ml-1">
-                →
-              </span>
-            </router-link>
-          </CardFooter>
-        </Card>
+          </p>
+        </div>
 
-        <Alert 
-          variant="destructive" 
+        <!-- Error Display -->
+        <div
           v-if="error"
-          class="animate-in fade-in-50 slide-in-from-bottom-5 bg-destructive/90 backdrop-blur-sm border-destructive/50"
+          class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg"
         >
-          <AlertTitle class="font-medium">Error</AlertTitle>
-          <AlertDescription>
-            {{ error }}
-          </AlertDescription>
-        </Alert>
+          <p class="text-sm text-red-600">{{ error }}</p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import { useForm } from 'vee-validate';
-import * as z from 'zod';
-import { toTypedSchema } from '@vee-validate/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form } from '@/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+import { useForm } from "vee-validate";
+import * as z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import {
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
-} from '@/components/ui/form';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+} from "@/components/ui/form";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(false);
-const error = ref('');
+const error = ref("");
 
-const formSchema = toTypedSchema(z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long')
-}));
+const formSchema = toTypedSchema(
+  z.object({
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+  })
+);
 
-const form = useForm({
+useForm({
   validationSchema: formSchema,
   initialValues: {
-    email: '',
-    password: ''
-  }
+    email: "",
+    password: "",
+  },
 });
 
 const handleRegister = async (values: any) => {
   loading.value = true;
-  error.value = '';
+  error.value = "";
 
   try {
     await authStore.register(values.email, values.password);
-    router.push('/');
+    router.push("/");
   } catch (err: any) {
     error.value = err.message;
   } finally {

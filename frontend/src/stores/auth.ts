@@ -42,7 +42,19 @@ export const useAuthStore = defineStore("auth", {
         this.isAuthenticated = true;
         return response.data;
       } catch (error: any) {
-        throw new Error(error.response?.data?.message || "Login failed");
+        // Ensure we're throwing the full error object so the view can access response data
+        if (error.response) {
+          // Server responded with error status
+          const errorMessage = error.response.data?.message || "Login failed";
+          const customError = new Error(errorMessage);
+          (customError as any).response = error.response;
+          throw customError;
+        } else {
+          // Network or other error
+          throw new Error(
+            error.message || "Network error. Please check your connection."
+          );
+        }
       } finally {
         this.loading = false;
       }

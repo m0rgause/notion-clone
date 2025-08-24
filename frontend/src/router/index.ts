@@ -21,23 +21,23 @@ const router = createRouter({
       component: () => import("../views/RegisterView.vue"),
     },
     {
-      path: "/notes",
-      name: "notes",
-      component: () => import("../views/NotesView.vue"),
+      path: "/notes/:id",
+      name: "note-detail",
+      component: () => import("../views/NoteDetailView.vue"),
       meta: { requiresAuth: true },
     },
     {
-      path: "/notes/:id",
-      name: "note-editor",
-      component: () => import("../views/NoteEditorView.vue"),
-      meta: { requiresAuth: true },
+      path: "/public/:publicId",
+      name: "public-note",
+      component: () => import("../views/PublicNoteView.vue"),
     },
   ],
 });
 
 // Navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
+  console.log("Auth Store - isAuthenticated:", authStore.isAuthenticated);
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next("/login");
   } else if (
@@ -49,15 +49,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
-// } else if (
-//   (to.name === "login" || to.name === "register") &&
-//   authStore.isAuthenticated
-// ) {
-//   next("/");
-// } else {
-//   next();
-// }
-// });
 
 export default router;

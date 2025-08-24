@@ -9,6 +9,7 @@ config();
 // Routes (will be imported later)
 import authRoutes from "./routes/auth.routes";
 import noteRoutes from "./routes/note.routes";
+import collaborationRoutes from "./routes/collaboration.routes";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api", collaborationRoutes);
 
 // Error handling middleware
 app.use(

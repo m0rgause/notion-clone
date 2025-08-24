@@ -5,19 +5,41 @@ export interface ServerToClientEvents {
     type: string;
     content: string;
     updatedBy: string;
+    timestamp: Date;
+  }) => void;
+  "block-created": (data: {
+    block: {
+      id: string;
+      type: string;
+      content: string;
+      noteId: string;
+      parentId?: string;
+      orderIndex: number;
+      createdAt: string;
+      updatedAt: string;
+    };
+    createdBy: string;
+    timestamp: Date;
+  }) => void;
+  "block-deleted": (data: {
+    blockId: string;
+    deletedBy: string;
+    timestamp: Date;
   }) => void;
   "blocks-reordered": (data: {
     blocks: { id: string; orderIndex: number }[];
     updatedBy: string;
+    timestamp: Date;
   }) => void;
-  "user-joined": (data: { userId: string; email: string }) => void;
-  "user-left": (data: { userId: string; email: string }) => void;
-  "active-users": (userIds: string[]) => void;
+  "user-joined": (data: { userId: string; timestamp: Date }) => void;
+  "user-left": (data: { userId: string; timestamp: Date }) => void;
+  "active-users": (
+    users: { userId: string; socketId: string; noteId: string }[]
+  ) => void;
   error: (data: { message: string }) => void;
 }
 
 export interface ClientToServerEvents {
-  authenticate: (token: string) => void;
   "join-note": (noteId: string) => void;
   "leave-note": (noteId: string) => void;
   "block-update": (data: {
@@ -26,7 +48,7 @@ export interface ClientToServerEvents {
     type: string;
     content: string;
   }) => void;
-  "block-reorder": (data: {
+  "blocks-reorder": (data: {
     noteId: string;
     blocks: { id: string; orderIndex: number }[];
   }) => void;

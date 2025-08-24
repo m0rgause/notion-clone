@@ -1,83 +1,115 @@
 <template>
   <Dialog :open="modelValue" @update:open="$emit('update:modelValue', $event)">
-    <DialogContent class=" sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle class="text-gradient text-2xl">Create New Note</DialogTitle>
-        <DialogDescription>
-          Give your note a title to get started. You can always change it later.
-        </DialogDescription>
-      </DialogHeader>
-      <form @submit.prevent="handleCreate">
-        <div class="grid gap-4 py-4">
-          <div class="space-y-2">
-            <Label for="title" class="text-foreground">Title</Label>
+    <DialogContent
+      class="sm:max-w-md p-0 bg-white border-0 shadow-xl rounded-xl overflow-hidden"
+    >
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <DialogTitle class="text-lg font-semibold text-gray-900">
+              Create a new page
+            </DialogTitle>
+            <DialogDescription class="text-sm text-gray-500 mt-1">
+              Start writing and organizing your thoughts
+            </DialogDescription>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form @submit.prevent="handleCreate" class="px-6 py-5">
+        <div class="space-y-4">
+          <div>
+            <Label
+              for="title"
+              class="text-sm font-medium text-gray-700 mb-2 block"
+            >
+              Page title
+            </Label>
             <Input
               id="title"
               v-model="noteTitle"
-              placeholder="Enter your note title..."
-              class="glass-effect"
+              placeholder="Untitled"
+              class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
               :disabled="creating"
               required
+              autofocus
             />
           </div>
         </div>
-        <DialogFooter>
+
+        <!-- Footer -->
+        <div
+          class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-100"
+        >
           <Button
             type="button"
             variant="ghost"
             @click="$emit('update:modelValue', false)"
             :disabled="creating"
+            class="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             type="submit"
-            :disabled="creating"
-            class="relative group overflow-hidden"
+            :disabled="creating || !noteTitle.trim()"
+            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all inline-flex items-center space-x-2"
           >
-            <span class="relative z-10 flex items-center gap-2">
-              {{ creating ? 'Creating...' : 'Create Note' }}
-              <DocumentPlusIcon v-if="!creating" class="h-4 w-4" />
-              <span v-else class="animate-spin">⌛</span>
-            </span>
-            <div class="absolute inset-0 bg-gradient-to-r from-primary to-secondary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"/>
+            <span>{{ creating ? "Creating..." : "Create page" }}</span>
+            <svg
+              v-if="!creating"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            <div
+              v-else
+              class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+            ></div>
           </Button>
-        </DialogFooter>
+        </div>
       </form>
     </DialogContent>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useNoteStore } from '@/stores/note';
-import { Button } from '@/components/ui/button';
+import { ref } from "vue";
+import { useNoteStore } from "@/stores/note";
+import { useToast } from "@/composables/useToast";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DocumentPlusIcon } from '@heroicons/vue/24/outline';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const props = defineProps<{
+defineProps<{
   modelValue: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'created', noteId: string): void;
+  (e: "update:modelValue", value: boolean): void;
+  (e: "created", note: any): void;
 }>();
 
-const router = useRouter();
 const noteStore = useNoteStore();
+const { success, error } = useToast();
 
-const noteTitle = ref('');
+const noteTitle = ref("");
 const creating = ref(false);
 
 const handleCreate = async () => {
@@ -86,12 +118,23 @@ const handleCreate = async () => {
   creating.value = true;
   try {
     const note = await noteStore.createNote(noteTitle.value);
-    emit('update:modelValue', false);
-    emit('created', note.id);
-    noteTitle.value = '';
-    router.push(`/notes/${note.id}`);
-  } catch (error) {
-    console.error('Failed to create note:', error);
+
+    // Show success toast
+    success(`Page "${noteTitle.value}" created successfully!`);
+
+    // Close modal immediately
+    emit("update:modelValue", false);
+
+    // Clear form
+    noteTitle.value = "";
+
+    // Delay emitting the created event to allow toast to show
+    setTimeout(() => {
+      emit("created", note);
+    }, 500);
+  } catch (err) {
+    console.error("Failed to create note:", err);
+    error("Failed to create page. Please try again.");
   } finally {
     creating.value = false;
   }

@@ -12,6 +12,7 @@ import {
   updateBlock,
   deleteBlock,
   reorderBlocks,
+  bulkUpdateBlocks,
 } from "../controllers/note.controller";
 
 const router = Router();
@@ -45,18 +46,13 @@ router.post(
       "IMAGE",
       "CODE",
     ]),
-    check("content", "Content is required").not().isEmpty(),
+    // check("content", "Content is required").not().isEmpty(),
     validate,
   ],
   createBlock
 );
 
-router.put(
-  "/:noteId/blocks/:blockId",
-  auth,
-  [check("content", "Content is required").not().isEmpty(), validate],
-  updateBlock
-);
+router.put("/:noteId/blocks/:blockId", auth, updateBlock);
 
 router.delete("/:noteId/blocks/:blockId", auth, deleteBlock);
 
@@ -70,6 +66,17 @@ router.put(
     validate,
   ],
   reorderBlocks
+);
+
+router.put(
+  "/:noteId/blocks/bulk-update",
+  auth,
+  [
+    check("blocks", "Blocks array is required").isArray(),
+    check("blocks.*.id", "Block ID is required").not().isEmpty(),
+    validate,
+  ],
+  bulkUpdateBlocks
 );
 
 export default router;

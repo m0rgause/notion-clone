@@ -23,6 +23,7 @@ interface ActiveUser {
 class SocketService {
   private io: SocketIOServer<ClientToServerEvents, ServerToClientEvents>;
   private activeUsers: ActiveUser[] = [];
+  private static instance: SocketService;
 
   constructor(server: HTTPServer) {
     this.io = new SocketIOServer(server, {
@@ -32,16 +33,37 @@ class SocketService {
       },
     });
 
+    SocketService.instance = this;
     this.setupSocketHandlers();
+  }
+
+  static getInstance(): SocketService | null {
+    return SocketService.instance;
+  }
+
+  // Method to emit events from controllers
+  emitToNote(noteId: string, event: keyof ServerToClientEvents, data: any) {
+    this.io.to(noteId).emit(event, data);
   }
 
   private setupSocketHandlers() {
     this.io.on("connection", async (socket: Socket) => {
       console.log("Client connected:", socket.id);
 
-      // Authenticate user using JWT from handshake
-      const token = socket.handshake.auth.token;
+      // Authenticate user using JWT from cookie
+      const cookies = socket.handshake.headers.cookie
+        ?.split(";")
+        .map((cookie) => cookie.trim())
+        .reduce((acc, cookie) => {
+          const [key, value] = cookie.split("=");
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, string>);
+
+      const token = cookies?.token;
+
       if (!token) {
+        console.error("No token found in cookies");
         socket.disconnect();
         return;
       }
@@ -75,6 +97,27 @@ class SocketService {
           }
         );
 
+        // Handle block creation
+        socket.on(
+          "block-create",
+          async (data: {
+            noteId: string;
+            type: string;
+            content: string;
+            parentId?: string;
+          }) => {
+            await this.handleBlockCreate(socket, user, data);
+          }
+        );
+
+        // Handle block deletion
+        socket.on(
+          "block-delete",
+          async (data: { noteId: string; blockId: string }) => {
+            await this.handleBlockDelete(socket, user, data);
+          }
+        );
+
         // Handle block reordering
         socket.on(
           "blocks-reorder",
@@ -99,11 +142,20 @@ class SocketService {
 
   private async handleJoinNote(socket: Socket, user: User, noteId: string) {
     try {
-      // Verify user has access to the note
+      // Verify user has access to the note (owner or collaborator)
       const note = await prisma.note.findFirst({
         where: {
-          id: noteId,
-          userId: user.id,
+          OR: [
+            { id: noteId, userId: user.id }, // User owns the note
+            {
+              id: noteId,
+              collaborators: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            }, // User is a collaborator
+          ],
         },
       });
 
@@ -156,16 +208,28 @@ class SocketService {
     data: { noteId: string; blockId: string; content: string; type: string }
   ) {
     try {
-      // Verify user has access to the note
+      // Verify user has edit access to the note (owner or collaborator with edit permission)
       const note = await prisma.note.findFirst({
         where: {
-          id: data.noteId,
-          userId: user.id,
+          OR: [
+            { id: data.noteId, userId: user.id }, // User owns the note
+            {
+              id: data.noteId,
+              collaborators: {
+                some: {
+                  userId: user.id,
+                  permission: "EDIT", // Only collaborators with edit permission
+                },
+              },
+            },
+          ],
         },
       });
 
       if (!note) {
-        socket.emit("error", { message: "Note access denied" });
+        socket.emit("error", {
+          message: "Note access denied or no edit permission",
+        });
         return;
       }
 
@@ -230,6 +294,128 @@ class SocketService {
     } catch (error) {
       console.error("Blocks reorder error:", error);
       socket.emit("error", { message: "Failed to reorder blocks" });
+    }
+  }
+
+  private async handleBlockCreate(
+    socket: Socket,
+    user: User,
+    data: { noteId: string; type: string; content: string; parentId?: string }
+  ) {
+    try {
+      // Verify user has edit access to the note
+      const note = await prisma.note.findFirst({
+        where: {
+          OR: [
+            { id: data.noteId, userId: user.id }, // User owns the note
+            {
+              id: data.noteId,
+              collaborators: {
+                some: {
+                  userId: user.id,
+                  permission: "EDIT", // Only collaborators with edit permission
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      if (!note) {
+        socket.emit("error", {
+          message: "Note access denied or no edit permission",
+        });
+        return;
+      }
+
+      // Get the highest order index
+      const lastBlock = await prisma.block.findFirst({
+        where: { noteId: data.noteId },
+        orderBy: { orderIndex: "desc" },
+      });
+
+      const newOrderIndex = lastBlock ? lastBlock.orderIndex + 1 : 0;
+
+      // Create the block
+      const newBlock = await prisma.block.create({
+        data: {
+          type: data.type as any,
+          content: data.content,
+          noteId: data.noteId,
+          parentId: data.parentId,
+          orderIndex: newOrderIndex,
+        },
+      });
+
+      // Update note's updatedAt timestamp
+      await prisma.note.update({
+        where: { id: data.noteId },
+        data: { updatedAt: new Date() },
+      });
+
+      // Broadcast the new block to others in the note
+      socket.to(data.noteId).emit("block-created", {
+        block: newBlock,
+        createdBy: user.id,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Block create error:", error);
+      socket.emit("error", { message: "Failed to create block" });
+    }
+  }
+
+  private async handleBlockDelete(
+    socket: Socket,
+    user: User,
+    data: { noteId: string; blockId: string }
+  ) {
+    try {
+      // Verify user has edit access to the note
+      const note = await prisma.note.findFirst({
+        where: {
+          OR: [
+            { id: data.noteId, userId: user.id }, // User owns the note
+            {
+              id: data.noteId,
+              collaborators: {
+                some: {
+                  userId: user.id,
+                  permission: "EDIT", // Only collaborators with edit permission
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      if (!note) {
+        socket.emit("error", {
+          message: "Note access denied or no edit permission",
+        });
+        return;
+      }
+
+      // Delete the block
+      await prisma.block.delete({
+        where: { id: data.blockId },
+      });
+
+      // Update note's updatedAt timestamp
+      await prisma.note.update({
+        where: { id: data.noteId },
+        data: { updatedAt: new Date() },
+      });
+
+      // Broadcast the deletion to others in the note
+      socket.to(data.noteId).emit("block-deleted", {
+        blockId: data.blockId,
+        deletedBy: user.id,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Block delete error:", error);
+      socket.emit("error", { message: "Failed to delete block" });
     }
   }
 
