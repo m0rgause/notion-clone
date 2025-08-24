@@ -1,16 +1,22 @@
 {
   "info": {
-    "_postman_id": "random-uuid",
-    "name": "Mini Notion Clone",
-    "description": "API collection for Mini Notion Clone",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "_postman_id": "mini-notion-clone-2025",
+    "name": "Mini Notion Clone API",
+    "description": "Complete API collection for Mini Notion Clone - A real-time collaborative note-taking application with Socket.IO support, rich text editing, and advanced collaboration features.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 2,
+      "minor": 0,
+      "patch": 0
+    }
   },
   "item": [
     {
-      "name": "Auth",
+      "name": "🔐 Authentication",
+      "description": "User authentication endpoints with JWT tokens",
       "item": [
         {
-          "name": "Register",
+          "name": "Register User",
           "request": {
             "method": "POST",
             "header": [
@@ -21,7 +27,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
@@ -33,11 +44,13 @@
                 "auth",
                 "register"
               ]
-            }
-          }
+            },
+            "description": "Create a new user account. Password must be at least 6 characters."
+          },
+          "response": []
         },
         {
-          "name": "Login",
+          "name": "Login User",
           "request": {
             "method": "POST",
             "header": [
@@ -48,7 +61,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -60,11 +78,13 @@
                 "auth",
                 "login"
               ]
-            }
-          }
+            },
+            "description": "Authenticate user and receive JWT token in cookie."
+          },
+          "response": []
         },
         {
-          "name": "Logout",
+          "name": "Logout User",
           "request": {
             "method": "POST",
             "url": {
@@ -77,8 +97,10 @@
                 "auth",
                 "logout"
               ]
-            }
-          }
+            },
+            "description": "Clear authentication cookie and logout user."
+          },
+          "response": []
         },
         {
           "name": "Get Current User",
@@ -94,13 +116,16 @@
                 "auth",
                 "me"
               ]
-            }
-          }
+            },
+            "description": "Get current authenticated user information."
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Notes",
+      "name": "📝 Notes Management",
+      "description": "CRUD operations for notes",
       "item": [
         {
           "name": "Create Note",
@@ -114,7 +139,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"title\": \"My First Note\"\n}"
+              "raw": "{\n    \"title\": \"My Awesome Note\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/notes",
@@ -125,8 +155,10 @@
                 "api",
                 "notes"
               ]
-            }
-          }
+            },
+            "description": "Create a new note with a title. Blocks can be added separately."
+          },
+          "response": []
         },
         {
           "name": "Get All Notes",
@@ -141,8 +173,10 @@
                 "api",
                 "notes"
               ]
-            }
-          }
+            },
+            "description": "Get all notes for the authenticated user, including shared notes."
+          },
+          "response": []
         },
         {
           "name": "Get Note by ID",
@@ -158,8 +192,10 @@
                 "notes",
                 "{{noteId}}"
               ]
-            }
-          }
+            },
+            "description": "Get a specific note with all its blocks and collaborators."
+          },
+          "response": []
         },
         {
           "name": "Update Note",
@@ -173,7 +209,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"title\": \"Updated Note Title\"\n}"
+              "raw": "{\n    \"title\": \"Updated Note Title\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/notes/{{noteId}}",
@@ -185,8 +226,10 @@
                 "notes",
                 "{{noteId}}"
               ]
-            }
-          }
+            },
+            "description": "Update note title and metadata."
+          },
+          "response": []
         },
         {
           "name": "Delete Note",
@@ -202,16 +245,19 @@
                 "notes",
                 "{{noteId}}"
               ]
-            }
-          }
+            },
+            "description": "Permanently delete a note and all its blocks."
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Blocks",
+      "name": "🧱 Content Blocks",
+      "description": "Manage content blocks within notes",
       "item": [
         {
-          "name": "Create Block",
+          "name": "Create Text Block",
           "request": {
             "method": "POST",
             "header": [
@@ -222,7 +268,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"type\": \"TEXT\",\n    \"content\": \"This is a text block\",\n    \"parentId\": null\n}"
+              "raw": "{\n    \"type\": \"TEXT\",\n    \"content\": \"<p>This is a rich text block with <strong>formatting</strong></p>\",\n    \"parentId\": null,\n    \"orderIndex\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks",
@@ -235,8 +286,80 @@
                 "{{noteId}}",
                 "blocks"
               ]
-            }
-          }
+            },
+            "description": "Create a new text block with rich text content."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Checklist Block",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"CHECKLIST\",\n    \"content\": \"<ul><li data-checked=\\\"false\\\">Task 1</li><li data-checked=\\\"true\\\">Task 2 (completed)</li></ul>\",\n    \"parentId\": null,\n    \"orderIndex\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks"
+              ]
+            },
+            "description": "Create a checklist block with tasks."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Code Block",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"CODE\",\n    \"content\": \"<pre><code class=\\\"language-javascript\\\">const hello = 'world';\\nconsole.log(hello);</code></pre>\",\n    \"parentId\": null,\n    \"orderIndex\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks"
+              ]
+            },
+            "description": "Create a code block with syntax highlighting."
+          },
+          "response": []
         },
         {
           "name": "Update Block",
@@ -250,7 +373,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"content\": \"Updated block content\"\n}"
+              "raw": "{\n    \"content\": \"<p>Updated block content with <em>new</em> formatting</p>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/{{blockId}}",
@@ -264,8 +392,10 @@
                 "blocks",
                 "{{blockId}}"
               ]
-            }
-          }
+            },
+            "description": "Update content of an existing block. Triggers real-time updates via Socket.IO."
+          },
+          "response": []
         },
         {
           "name": "Delete Block",
@@ -283,8 +413,10 @@
                 "blocks",
                 "{{blockId}}"
               ]
-            }
-          }
+            },
+            "description": "Delete a block. Triggers real-time updates via Socket.IO."
+          },
+          "response": []
         },
         {
           "name": "Reorder Blocks",
@@ -298,7 +430,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"blocks\": [\n        {\n            \"id\": \"block-id-1\",\n            \"orderIndex\": 0\n        },\n        {\n            \"id\": \"block-id-2\",\n            \"orderIndex\": 1\n        }\n    ]\n}"
+              "raw": "{\n    \"blocks\": [\n        {\n            \"id\": \"block-id-1\",\n            \"orderIndex\": 0\n        },\n        {\n            \"id\": \"block-id-2\",\n            \"orderIndex\": 1\n        },\n        {\n            \"id\": \"block-id-3\",\n            \"orderIndex\": 2\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/reorder",
@@ -312,16 +449,237 @@
                 "blocks",
                 "reorder"
               ]
-            }
-          }
+            },
+            "description": "Reorder blocks by updating their orderIndex. Supports drag-and-drop functionality."
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Update Blocks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"blocks\": [\n        {\n            \"id\": \"block-id-1\",\n            \"content\": \"<p>Updated content 1</p>\"\n        },\n        {\n            \"id\": \"block-id-2\",\n            \"content\": \"<p>Updated content 2</p>\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/blocks/bulk-update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "blocks",
+                "bulk-update"
+              ]
+            },
+            "description": "Update multiple blocks in a single request for performance optimization."
+          },
+          "response": []
         }
       ]
+    },
+    {
+      "name": "👥 Collaboration",
+      "description": "Note sharing and collaboration features",
+      "item": [
+        {
+          "name": "Add Collaborator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"collaborator@example.com\",\n    \"permission\": \"edit\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/collaborators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "collaborators"
+              ]
+            },
+            "description": "Add a collaborator to a note. Permissions: 'view', 'comment', 'edit'"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Collaborator",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/collaborators/{{collaboratorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "collaborators",
+                "{{collaboratorId}}"
+              ]
+            },
+            "description": "Remove a collaborator from a note."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Public Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"isPublic\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/{{noteId}}/public",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notes",
+                "{{noteId}}",
+                "public"
+              ]
+            },
+            "description": "Make a note public or private. Public notes get a shareable URL."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Collaborations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/my-collaborations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "my-collaborations"
+              ]
+            },
+            "description": "Get all notes where the current user is a collaborator."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public Note",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/public/{{publicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "{{publicId}}"
+              ]
+            },
+            "description": "Access a public note without authentication using its public ID."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-generate UUIDs for noteId and blockId if not set",
+          "if (!pm.collectionVariables.get('noteId')) {",
+          "    pm.collectionVariables.set('noteId', 'your-note-id-here');",
+          "}",
+          "if (!pm.collectionVariables.get('blockId')) {",
+          "    pm.collectionVariables.set('blockId', 'your-block-id-here');",
+          "}",
+          "if (!pm.collectionVariables.get('collaboratorId')) {",
+          "    pm.collectionVariables.set('collaboratorId', 'your-collaborator-id-here');",
+          "}",
+          "if (!pm.collectionVariables.get('publicId')) {",
+          "    pm.collectionVariables.set('publicId', 'your-public-id-here');",
+          "}"
+        ]
+      }
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000"
+      "value": "http://localhost:3000",
+      "description": "Backend API base URL"
+    },
+    {
+      "key": "noteId",
+      "value": "",
+      "description": "ID of the note to operate on"
+    },
+    {
+      "key": "blockId",
+      "value": "",
+      "description": "ID of the block to operate on"
+    },
+    {
+      "key": "collaboratorId",
+      "value": "",
+      "description": "ID of the collaborator to remove"
+    },
+    {
+      "key": "publicId",
+      "value": "",
+      "description": "Public ID for accessing shared notes"
     }
-  ]
+  ],
+  "protocolProfileBehavior": {
+    "cookieJar": {
+      "partitioned": false
+    }
+  }
 }

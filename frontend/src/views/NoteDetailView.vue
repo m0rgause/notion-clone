@@ -4,9 +4,7 @@
     <div
       class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100"
     >
-      <div
-        class="max-w-5x // Listen for block deletion from all users socketStore.onBlockDeleted((data) => { if (note.value) { // Remove block (from any user) const currentBlocks = note.value.blocks.filter( (block) => block.id !== data.blockId ); note.value.blocks = currentBlocks; } });3"
-      >
+      <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between">
           <button
             @click="goBack"
