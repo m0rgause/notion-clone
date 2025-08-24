@@ -160,13 +160,9 @@ export const useNoteStore = defineStore("note", {
       this.error = null; // Clear previous errors
       try {
         const response = await api.post(`/notes/${noteId}/blocks`, block);
-        const index = this.notes.findIndex((note) => note.id === noteId);
-        if (index !== -1) {
-          this.notes[index].blocks.push(response.data);
-        }
-        if (this.currentNote?.id === noteId) {
-          this.currentNote.blocks.push(response.data);
-        }
+
+        // Don't update local state here - let socket events handle all updates
+        // This prevents duplication between API response and socket events
 
         return response.data;
       } catch (error: any) {
@@ -180,23 +176,10 @@ export const useNoteStore = defineStore("note", {
         const response = await api.put(`/notes/${noteId}/blocks/${blockId}`, {
           content,
         });
-        const noteIndex = this.notes.findIndex((note) => note.id === noteId);
-        if (noteIndex !== -1) {
-          const blockIndex = this.notes[noteIndex].blocks.findIndex(
-            (b) => b.id === blockId
-          );
-          if (blockIndex !== -1) {
-            this.notes[noteIndex].blocks[blockIndex] = response.data;
-          }
-        }
-        if (this.currentNote?.id === noteId) {
-          const blockIndex = this.currentNote.blocks.findIndex(
-            (b) => b.id === blockId
-          );
-          if (blockIndex !== -1) {
-            this.currentNote.blocks[blockIndex] = response.data;
-          }
-        }
+
+        // Don't update local state here - let socket events handle all updates
+        // This prevents duplication between API response and socket events
+
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || "Failed to update block";
@@ -259,17 +242,9 @@ export const useNoteStore = defineStore("note", {
       this.error = null; // Clear previous errors
       try {
         await api.delete(`/notes/${noteId}/blocks/${blockId}`);
-        const noteIndex = this.notes.findIndex((note) => note.id === noteId);
-        if (noteIndex !== -1) {
-          this.notes[noteIndex].blocks = this.notes[noteIndex].blocks.filter(
-            (b) => b.id !== blockId
-          );
-        }
-        if (this.currentNote?.id === noteId) {
-          this.currentNote.blocks = this.currentNote.blocks.filter(
-            (b) => b.id !== blockId
-          );
-        }
+
+        // Don't update local state here - let socket events handle all updates
+        // This prevents duplication between API response and socket events
       } catch (error: any) {
         this.error = error.response?.data?.message || "Failed to delete block";
         throw error;

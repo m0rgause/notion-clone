@@ -208,39 +208,60 @@ const noteId = computed(() => route.params.id as string);
 
 // Socket event listeners setup
 const setupSocketListeners = () => {
-  // Listen for block creation from other users
+  // Listen for block creation from all users (including self)
   socketStore.onBlockCreated((data) => {
-    if (
-      data.block.noteId === noteId.value &&
-      note.value &&
-      data.createdBy !== authStore.user?.id
-    ) {
-      // Only add blocks created by other users (not current user)
-      const newBlock = {
-        ...data.block,
-        type: data.block.type as "TEXT" | "CHECKLIST" | "IMAGE" | "CODE",
-      };
-      note.value.blocks.push(newBlock);
+    console.log("Received block-created event:", data);
+    if (data.block.noteId === noteId.value && note.value) {
+      // Check if block already exists (to prevent duplicates)
+      const existingBlock = note.value.blocks.find(
+        (block) => block.id === data.block.id
+      );
+      if (!existingBlock) {
+        console.log("Adding new block:", data.block);
+        const newBlock = {
+          ...data.block,
+          type: data.block.type as "TEXT" | "CHECKLIST" | "IMAGE" | "CODE",
+        };
 
-      // Sort blocks by orderIndex to maintain order
-      note.value.blocks.sort((a, b) => a.orderIndex - b.orderIndex);
+        // Use reactive update to ensure Vue detects the change
+        const currentBlocks = [...note.value.blocks];
+        currentBlocks.push(newBlock);
+        currentBlocks.sort((a, b) => a.orderIndex - b.orderIndex);
+        note.value.blocks = currentBlocks;
+
+        console.log("Updated blocks count:", note.value.blocks.length);
+      } else {
+        console.log("Block already exists, skipping duplicate");
+      }
+    } else {
+      console.log("Ignoring block-created event - different note");
     }
   });
 
   // Listen for block deletion from other users
   socketStore.onBlockDeleted((data) => {
-    if (note.value && data.deletedBy !== authStore.user?.id) {
-      // Only remove blocks deleted by other users (not current user)
-      note.value.blocks = note.value.blocks.filter(
+    console.log("Received block-deleted event:", data);
+    if (note.value) {
+      console.log("Removing block:", data.blockId);
+      // Remove block (from any user)
+      const currentBlocks = note.value.blocks.filter(
         (block) => block.id !== data.blockId
       );
+      note.value.blocks = currentBlocks;
+      console.log(
+        "Updated blocks count after deletion:",
+        note.value.blocks.length
+      );
+    } else {
+      console.log("Ignoring block-deleted event - no note");
     }
   });
 
-  // Listen for block updates from other users
+  // Listen for block updates from all users
   socketStore.onBlockUpdated((data) => {
-    if (note.value && data.updatedBy !== authStore.user?.id) {
-      // Only apply updates from other users (not current user)
+    console.log("Received block-updated event:", data);
+    if (note.value) {
+      // Apply updates from all users (socket events are the single source of truth)
       const blockIndex = note.value.blocks.findIndex(
         (block) => block.id === data.blockId
       );
@@ -252,14 +273,16 @@ const setupSocketListeners = () => {
           | "CHECKLIST"
           | "IMAGE"
           | "CODE";
+        console.log("Updated block content:", data.blockId);
       }
     }
   });
 
-  // Listen for block reordering from other users
+  // Listen for block reordering from all users
   socketStore.onBlocksReordered((data) => {
-    if (note.value && data.updatedBy !== authStore.user?.id) {
-      // Only apply reordering from other users (not current user)
+    console.log("Received blocks-reordered event:", data);
+    if (note.value) {
+      // Apply reordering from all users (socket events are the single source of truth)
       // Update order indices for all affected blocks
       data.blocks.forEach((blockUpdate) => {
         const blockIndex = note.value!.blocks.findIndex(
@@ -270,8 +293,9 @@ const setupSocketListeners = () => {
         }
       });
 
-      // Sort blocks by orderIndex to reflect new order
+      // Re-sort the blocks by orderIndex
       note.value.blocks.sort((a, b) => a.orderIndex - b.orderIndex);
+      console.log("Reordered blocks");
     }
   });
 };
@@ -291,6 +315,10 @@ onMounted(async () => {
 
     if (note.value) {
       noteTitle.value = note.value.title;
+
+      // Join the note room for real-time collaboration
+      socketStore.joinNote(noteId.value);
+      console.log("Joined note room:", noteId.value);
     }
   } catch (err) {
     console.error("Failed to fetch note:", err);
@@ -300,6 +328,12 @@ onMounted(async () => {
 onUnmounted(() => {
   if (titleUpdateTimeout.value) {
     clearTimeout(titleUpdateTimeout.value);
+  }
+
+  // Leave the note room
+  if (note.value) {
+    socketStore.leaveNote(noteId.value);
+    console.log("Left note room:", noteId.value);
   }
 
   // Clean up socket listeners

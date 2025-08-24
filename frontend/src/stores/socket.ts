@@ -123,8 +123,11 @@ export const useSocketStore = defineStore("socket", {
     },
 
     joinNote(noteId: string) {
+      console.log("Joining note:", noteId);
       if (this.socket) {
         this.socket.emit("join-note", noteId);
+      } else {
+        console.log("Socket not connected, cannot join note");
       }
     },
 
@@ -184,6 +187,7 @@ export const useSocketStore = defineStore("socket", {
     },
 
     onBlockCreated(callback: (data: BlockCreateData) => void) {
+      console.log("Setting up onBlockCreated listener");
       if (this.socket) {
         this.socket.on("block-created", callback);
       }

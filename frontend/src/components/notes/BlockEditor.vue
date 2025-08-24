@@ -282,7 +282,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import draggable from "vuedraggable";
 import TextBlock from "./blocks/TextBlock.vue";
 import ChecklistBlock from "./blocks/ChecklistBlock.vue";
@@ -326,40 +326,28 @@ const initializeBlocks = () => {
   );
 };
 
+// Watch for changes in initialBlocks prop
+watch(
+  () => props.initialBlocks,
+  (newBlocks) => {
+    console.log("BlockEditor: initialBlocks changed", newBlocks.length);
+    blocks.value = [...newBlocks].sort((a, b) => a.orderIndex - b.orderIndex);
+  },
+  { deep: true }
+);
+
 onMounted(() => {
   initializeBlocks();
 
-  // Join the note room for real-time updates
-  socketStore.joinNote(props.noteId);
-
-  // Listen for real-time block updates
-  socketStore.onBlockUpdated((data) => {
-    const blockIndex = blocks.value.findIndex((b) => b.id === data.blockId);
-    if (blockIndex !== -1) {
-      blocks.value[blockIndex].content = data.content;
-      blocks.value[blockIndex].type = data.type as any;
-    }
-  });
-
-  // Listen for real-time block reordering
-  socketStore.onBlocksReordered((data) => {
-    // Update the order of blocks
-    data.blocks.forEach((blockUpdate) => {
-      const block = blocks.value.find((b) => b.id === blockUpdate.id);
-      if (block) {
-        block.orderIndex = blockUpdate.orderIndex;
-      }
-    });
-    // Re-sort blocks
-    blocks.value.sort((a, b) => a.orderIndex - b.orderIndex);
-  });
+  // Note: Socket connection and events are now handled by NoteDetailView
+  // No need to join note room or listen to events here
 
   // Close menus when clicking outside
   document.addEventListener("click", closeMenusOnOutsideClick);
 });
 
 onUnmounted(() => {
-  socketStore.leaveNote(props.noteId);
+  // Note: Socket cleanup is handled by NoteDetailView
   document.removeEventListener("click", closeMenusOnOutsideClick);
   if (autosaveTimeout.value) {
     clearTimeout(autosaveTimeout.value);
@@ -445,13 +433,13 @@ const updateBlock = async (blockId: string, content: string) => {
 const addBlock = async (type: Block["type"]) => {
   try {
     const orderIndex = blocks.value.length;
-    const newBlock = await noteStore.createBlock(props.noteId, {
+    await noteStore.createBlock(props.noteId, {
       type,
       content: "",
       orderIndex,
       parentId: null,
     });
-    blocks.value.push(newBlock);
+    // Don't manually add to blocks.value - it will be updated via socket events
     closeMenus();
   } catch (error) {
     console.error("Failed to add block:", error);
@@ -472,14 +460,14 @@ const addBlockAfter = async (afterBlockId: string, type: Block["type"]) => {
       }
     });
 
-    const newBlock = await noteStore.createBlock(props.noteId, {
+    await noteStore.createBlock(props.noteId, {
       type,
       content: "",
       orderIndex: newOrderIndex,
       parentId: null,
     });
 
-    blocks.value.splice(afterIndex + 1, 0, newBlock);
+    // Don't manually add to blocks.value - it will be updated via socket events
     closeMenus();
 
     // Wait longer to ensure the block is fully created in the database
@@ -551,23 +539,15 @@ const duplicateBlock = async (blockId: string) => {
 const deleteBlock = async (blockId: string) => {
   try {
     await noteStore.deleteBlock(props.noteId, blockId);
-    const blockIndex = blocks.value.findIndex((b) => b.id === blockId);
-    if (blockIndex !== -1) {
-      blocks.value.splice(blockIndex, 1);
-      // Update order indices
-      blocks.value.forEach((block, index) => {
-        block.orderIndex = index;
-      });
 
-      // Wait longer before reordering
-      setTimeout(() => {
-        scheduleAutosave();
-      }, 1000);
-    }
+    // Don't manually update local state - let socket events handle the deletion
+    // This prevents conflicts between manual updates and socket events
+
+    closeMenus();
   } catch (error) {
     console.error("Failed to delete block:", error);
+    closeMenus();
   }
-  closeMenus();
 };
 
 const onDragEnd = () => {

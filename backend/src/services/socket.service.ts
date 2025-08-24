@@ -43,6 +43,7 @@ class SocketService {
 
   // Method to emit events from controllers
   emitToNote(noteId: string, event: keyof ServerToClientEvents, data: any) {
+    console.log(`Emitting ${event} to room ${noteId}:`, data);
     this.io.to(noteId).emit(event, data);
   }
 
@@ -166,6 +167,7 @@ class SocketService {
 
       // Add user to the note's room
       socket.join(noteId);
+      console.log(`User ${user.id} joined note room: ${noteId}`);
 
       // Add to active users
       this.activeUsers.push({

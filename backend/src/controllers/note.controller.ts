@@ -328,6 +328,9 @@ export const createBlock = async (req: AuthRequest, res: Response) => {
     // Emit socket event for real-time collaboration
     const socketService = SocketService.getInstance();
     if (socketService) {
+      console.log(
+        `Emitting block-created event for noteId: ${noteId}, blockId: ${block.id}`
+      );
       socketService.emitToNote(noteId, "block-created", {
         block: {
           id: block.id,
@@ -342,6 +345,8 @@ export const createBlock = async (req: AuthRequest, res: Response) => {
         createdBy: userId,
         timestamp: new Date(),
       });
+    } else {
+      console.log("SocketService instance not found!");
     }
 
     res.status(201).json(block);
@@ -457,6 +462,21 @@ export const deleteBlock = async (req: AuthRequest, res: Response) => {
     await prisma.block.delete({
       where: { id: blockId },
     });
+
+    // Emit socket event for real-time collaboration
+    const socketService = SocketService.getInstance();
+    if (socketService) {
+      console.log(
+        `Emitting block-deleted event for noteId: ${noteId}, blockId: ${blockId}`
+      );
+      socketService.emitToNote(noteId, "block-deleted", {
+        blockId,
+        deletedBy: userId,
+        timestamp: new Date(),
+      });
+    } else {
+      console.log("SocketService instance not found!");
+    }
 
     res.json({ message: "Block deleted successfully" });
   } catch (error) {
