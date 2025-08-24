@@ -68,12 +68,6 @@ export const useSocketStore = defineStore("socket", {
 
   actions: {
     connect() {
-      console.log(
-        "Connecting to socket...",
-        import.meta.env.VITE_SOCKET_URL,
-        "Status",
-        this.connected
-      );
       if (!this.socket) {
         this.socket = io(import.meta.env.VITE_SOCKET_URL, {
           withCredentials: true,
@@ -82,12 +76,10 @@ export const useSocketStore = defineStore("socket", {
 
         this.socket.on("connect", () => {
           this.connected = true;
-          console.log("Socket connected");
         });
 
         this.socket.on("disconnect", () => {
           this.connected = false;
-          console.log("Socket disconnected");
         });
 
         this.socket.on("error", (error: { message: string }) => {
@@ -123,11 +115,8 @@ export const useSocketStore = defineStore("socket", {
     },
 
     joinNote(noteId: string) {
-      console.log("Joining note:", noteId);
       if (this.socket) {
         this.socket.emit("join-note", noteId);
-      } else {
-        console.log("Socket not connected, cannot join note");
       }
     },
 
@@ -187,7 +176,6 @@ export const useSocketStore = defineStore("socket", {
     },
 
     onBlockCreated(callback: (data: BlockCreateData) => void) {
-      console.log("Setting up onBlockCreated listener");
       if (this.socket) {
         this.socket.on("block-created", callback);
       }

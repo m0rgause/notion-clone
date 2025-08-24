@@ -212,7 +212,6 @@ const localIsPublic = ref(props.isPublic);
 watch(
   () => props.isPublic,
   (newValue) => {
-    console.log("ShareNoteModal: isPublic prop changed:", newValue);
     localIsPublic.value = newValue;
   }
 );
@@ -220,9 +219,7 @@ watch(
 // Watch collaborators prop
 watch(
   () => props.collaborators,
-  (newValue) => {
-    console.log("ShareNoteModal: collaborators prop changed:", newValue);
-  },
+  () => {},
   { deep: true }
 );
 
@@ -231,11 +228,6 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen) {
-      console.log("ShareNoteModal opened with props:", {
-        collaborators: props.collaborators,
-        isPublic: props.isPublic,
-        noteId: props.noteId,
-      });
       // Sync local state with props when modal opens
       localIsPublic.value = props.isPublic;
     }
@@ -263,18 +255,12 @@ const getInitials = (email: string) => {
 };
 
 const addCollaborator = async () => {
-  console.log("ShareNoteModal addCollaborator called");
-  console.log("Email:", newCollaboratorEmail.value);
-  console.log("Permission:", newCollaboratorPermission.value);
-
   if (!newCollaboratorEmail.value) {
-    console.log("No email provided");
     return;
   }
 
   adding.value = true;
   try {
-    console.log("Emitting add-collaborator event");
     emit("add-collaborator", {
       email: newCollaboratorEmail.value,
       permission: newCollaboratorPermission.value,
@@ -283,7 +269,6 @@ const addCollaborator = async () => {
     success(`Invited ${newCollaboratorEmail.value} to collaborate`);
     newCollaboratorEmail.value = "";
     newCollaboratorPermission.value = "edit";
-    console.log("Add collaborator completed successfully");
   } catch (err) {
     console.error("Error in addCollaborator:", err);
     error("Failed to add collaborator");

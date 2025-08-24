@@ -4,7 +4,9 @@
     <div
       class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100"
     >
-      <div class="max-w-5xl mx-auto px-6 py-3">
+      <div
+        class="max-w-5x // Listen for block deletion from all users socketStore.onBlockDeleted((data) => { if (note.value) { // Remove block (from any user) const currentBlocks = note.value.blocks.filter( (block) => block.id !== data.blockId ); note.value.blocks = currentBlocks; } });3"
+      >
         <div class="flex items-center justify-between">
           <button
             @click="goBack"
@@ -202,7 +204,6 @@ const collaborators = computed(() => {
   const collabs = note.value?.collaborators || [];
   return collabs;
 });
-console.log("error:", error.value);
 
 const noteId = computed(() => route.params.id as string);
 
@@ -210,14 +211,12 @@ const noteId = computed(() => route.params.id as string);
 const setupSocketListeners = () => {
   // Listen for block creation from all users (including self)
   socketStore.onBlockCreated((data) => {
-    console.log("Received block-created event:", data);
     if (data.block.noteId === noteId.value && note.value) {
       // Check if block already exists (to prevent duplicates)
       const existingBlock = note.value.blocks.find(
         (block) => block.id === data.block.id
       );
       if (!existingBlock) {
-        console.log("Adding new block:", data.block);
         const newBlock = {
           ...data.block,
           type: data.block.type as "TEXT" | "CHECKLIST" | "IMAGE" | "CODE",
@@ -228,38 +227,23 @@ const setupSocketListeners = () => {
         currentBlocks.push(newBlock);
         currentBlocks.sort((a, b) => a.orderIndex - b.orderIndex);
         note.value.blocks = currentBlocks;
-
-        console.log("Updated blocks count:", note.value.blocks.length);
-      } else {
-        console.log("Block already exists, skipping duplicate");
       }
-    } else {
-      console.log("Ignoring block-created event - different note");
     }
   });
 
   // Listen for block deletion from other users
   socketStore.onBlockDeleted((data) => {
-    console.log("Received block-deleted event:", data);
     if (note.value) {
-      console.log("Removing block:", data.blockId);
       // Remove block (from any user)
       const currentBlocks = note.value.blocks.filter(
         (block) => block.id !== data.blockId
       );
       note.value.blocks = currentBlocks;
-      console.log(
-        "Updated blocks count after deletion:",
-        note.value.blocks.length
-      );
-    } else {
-      console.log("Ignoring block-deleted event - no note");
     }
   });
 
   // Listen for block updates from all users
   socketStore.onBlockUpdated((data) => {
-    console.log("Received block-updated event:", data);
     if (note.value) {
       // Apply updates from all users (socket events are the single source of truth)
       const blockIndex = note.value.blocks.findIndex(
@@ -273,14 +257,12 @@ const setupSocketListeners = () => {
           | "CHECKLIST"
           | "IMAGE"
           | "CODE";
-        console.log("Updated block content:", data.blockId);
       }
     }
   });
 
   // Listen for block reordering from all users
   socketStore.onBlocksReordered((data) => {
-    console.log("Received blocks-reordered event:", data);
     if (note.value) {
       // Apply reordering from all users (socket events are the single source of truth)
       // Update order indices for all affected blocks
@@ -295,7 +277,6 @@ const setupSocketListeners = () => {
 
       // Re-sort the blocks by orderIndex
       note.value.blocks.sort((a, b) => a.orderIndex - b.orderIndex);
-      console.log("Reordered blocks");
     }
   });
 };
@@ -318,7 +299,6 @@ onMounted(async () => {
 
       // Join the note room for real-time collaboration
       socketStore.joinNote(noteId.value);
-      console.log("Joined note room:", noteId.value);
     }
   } catch (err) {
     console.error("Failed to fetch note:", err);
@@ -333,7 +313,6 @@ onUnmounted(() => {
   // Leave the note room
   if (note.value) {
     socketStore.leaveNote(noteId.value);
-    console.log("Left note room:", noteId.value);
   }
 
   // Clean up socket listeners
@@ -394,10 +373,6 @@ const formatDate = (dateString: string) => {
 
 // Collaboration methods
 const openShareModal = () => {
-  console.log("Opening share modal");
-  console.log("Current note:", note.value);
-  console.log("Current collaborators:", collaborators.value);
-  console.log("Current isPublic:", note.value?.isPublic);
   showShareModal.value = true;
 };
 
@@ -406,21 +381,14 @@ const handleAddCollaborator = async (data: {
   permission: string;
 }) => {
   try {
-    console.log("handleAddCollaborator called with:", data);
-    console.log("Current note:", note.value);
-
     if (!note.value) {
       console.error("No note available");
       return;
     }
 
     const permission = data.permission as "view" | "comment" | "edit";
-    console.log("Adding collaborator to note:", note.value.id);
 
     await noteStore.addCollaborator(note.value.id, data.email, permission);
-
-    console.log("Collaborator added successfully");
-    console.log("Updated collaborators:", note.value.collaborators);
 
     showToast({
       type: "success",
@@ -456,17 +424,12 @@ const handleRemoveCollaborator = async (collaboratorId: string) => {
 
 const handleTogglePublic = async (isPublic: boolean) => {
   try {
-    console.log("handleTogglePublic called with:", isPublic);
-    console.log("Current note:", note.value);
-
     if (!note.value) {
       console.error("No note available for toggle public");
       return;
     }
 
-    console.log("Updating public status for note:", note.value.id);
     await noteStore.updateNotePublicStatus(note.value.id, isPublic);
-    console.log("Public status updated. New status:", note.value.isPublic);
 
     showToast({
       type: "success",

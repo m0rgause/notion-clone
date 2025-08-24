@@ -43,14 +43,11 @@ class SocketService {
 
   // Method to emit events from controllers
   emitToNote(noteId: string, event: keyof ServerToClientEvents, data: any) {
-    console.log(`Emitting ${event} to room ${noteId}:`, data);
     this.io.to(noteId).emit(event, data);
   }
 
   private setupSocketHandlers() {
     this.io.on("connection", async (socket: Socket) => {
-      console.log("Client connected:", socket.id);
-
       // Authenticate user using JWT from cookie
       const cookies = socket.handshake.headers.cookie
         ?.split(";")
@@ -167,7 +164,6 @@ class SocketService {
 
       // Add user to the note's room
       socket.join(noteId);
-      console.log(`User ${user.id} joined note room: ${noteId}`);
 
       // Add to active users
       this.activeUsers.push({
@@ -433,7 +429,6 @@ class SocketService {
 
     // Remove user from active users
     this.activeUsers = this.activeUsers.filter((u) => u.socketId !== socket.id);
-    console.log("Client disconnected:", socket.id);
   }
 }
 

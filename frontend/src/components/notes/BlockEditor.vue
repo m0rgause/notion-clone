@@ -331,7 +331,6 @@ const initializeBlocks = () => {
 watch(
   () => props.initialBlocks,
   (newBlocks) => {
-    console.log("BlockEditor: initialBlocks changed", newBlocks.length);
     blocks.value = [...newBlocks].sort((a, b) => a.orderIndex - b.orderIndex);
   },
   { deep: true }
@@ -395,7 +394,6 @@ const reorderBlocksNow = async () => {
     //   (block) => block.id && block.id.length > 10 // Ensure it's a valid database ID
     // );
     // if (savedBlocks.length === 0) {
-    //   console.log("No saved blocks to reorder");
     //   return;
     // }
     // await noteStore.reorderBlocks(
