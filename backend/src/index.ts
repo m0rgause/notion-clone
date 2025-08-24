@@ -1,12 +1,16 @@
-import express from "express";
+import app from "./app";
+import { createServer } from "http";
+import SocketService from "./services/socket.service";
 
-const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+// Create HTTP server
+const server = createServer(app);
 
-app.listen(port, () => {
+// Initialize WebSocket service
+new SocketService(server);
+
+// Start the server
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });

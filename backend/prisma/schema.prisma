@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -12,4 +6,74 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String             @id @default(uuid())
+  email          String             @unique
+  password       String
+  notes          Note[]
+  collaborations NoteCollaborator[]
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Note {
+  id            String             @id @default(uuid())
+  title         String
+  isPublic      Boolean            @default(false) @map("is_public")
+  publicId      String?            @unique @map("public_id") // For public link access
+  userId        String             @map("user_id")
+  user          User               @relation(fields: [userId], references: [id])
+  blocks        Block[]
+  collaborators NoteCollaborator[]
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  @@map("notes")
+}
+
+model NoteCollaborator {
+  id         String     @id @default(uuid())
+  noteId     String     @map("note_id")
+  note       Note       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  userId     String     @map("user_id")
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @default(VIEW)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@unique([noteId, userId])
+  @@map("note_collaborators")
+}
+
+model Block {
+  id         String    @id @default(uuid())
+  noteId     String    @map("note_id")
+  note       Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  parentId   String?   @map("parent_id")
+  parent     Block?    @relation("BlockToBlock", fields: [parentId], references: [id])
+  children   Block[]   @relation("BlockToBlock")
+  type       BlockType
+  content    String?
+  orderIndex Int       @map("order_index")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("blocks")
+}
+
+enum BlockType {
+  TEXT
+  CHECKLIST
+  IMAGE
+  CODE
+}
+
+enum Permission {
+  VIEW
+  COMMENT
+  EDIT
 }
