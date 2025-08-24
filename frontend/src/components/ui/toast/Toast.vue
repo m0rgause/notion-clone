@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 interface Props {
   message: string;
@@ -134,9 +134,9 @@ onMounted(() => {
   }
 });
 
-const onUnmounted = () => {
+onUnmounted(() => {
   if (timeoutId) {
     clearTimeout(timeoutId);
   }
-};
+});
 </script>
